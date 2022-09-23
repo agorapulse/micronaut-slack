@@ -1,0 +1,4 @@
+dependencies {
+    implementation project(':micronaut-slack-core')
+    implementation 'ch.qos.logback:logback-classic:1.4.1'
+}

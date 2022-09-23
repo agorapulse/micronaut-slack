@@ -1,0 +1,22 @@
+display_information:
+  name: Micronaut Commander
+features:
+  bot_user:
+    display_name: Micronaut Commander
+    always_online: false
+  slash_commands:
+    - command: /commander
+      # npm install -g localtunnel
+      # lt -p 8080 -s micronaut-commander
+      url: https://micronaut-commander.loca.lt/slack/events
+      description: Micronaut Commander
+      usage_hint: ahoy
+      should_escape: false
+oauth_config:
+  scopes:
+    bot:
+      - commands
+settings:
+  org_deploy_enabled: false
+  socket_mode_enabled: false
+  token_rotation_enabled: false

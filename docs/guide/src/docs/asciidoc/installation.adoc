@@ -1,0 +1,18 @@
+
+[[_installation_]]
+= Installation
+
+[source,groovy,subs='verbatim,attributes']
+----
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // for sending messages and other simple integration
+    implemenation 'com.agorapulse:micronaut-slack-core:{project-version}'
+
+    // for providing own webhooks, event handlers and OAuth workflow
+    implemenation 'com.agorapulse:micronaut-slack-http:{project-version}'
+}
+----

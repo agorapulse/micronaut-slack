@@ -1,0 +1,12 @@
+
+[[_introduction]]
+= Introduction
+
+Micronaut Slack is more idiomatic alternative to https://slack.dev/java-slack-sdk/guides/supported-web-frameworks#micronaut[Bolt Micronaut] library
+for https://api.slack.com[Slack API] integration into the Micronaut applications.
+
+The main difference compared to https://slack.dev/java-slack-sdk/guides/supported-web-frameworks#micronaut[Bolt Micronaut]
+
+* Using https://docs.micronaut.io/latest/guide/#config[Micronaut configuration chain] to configure Bolt's `AppConfig`
+* Main bolt classes such as `Slack`, `App` and `MethodsClient` available as beans
+* Ability to define handlers as standalone beans out of the box

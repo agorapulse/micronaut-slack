@@ -1,0 +1,218 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright 2022 Agorapulse.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+plugins {
+    id 'org.kordamp.gradle.groovy-project'
+    id 'org.kordamp.gradle.checkstyle'
+    id 'org.kordamp.gradle.codenarc'
+    id 'org.kordamp.gradle.coveralls'
+    id 'io.github.gradle-nexus.publish-plugin'
+}
+
+if (!project.hasProperty('ossrhUsername'))      ext.ossrhUsername       = System.getenv('SONATYPE_USERNAME') ?: '**UNDEFINED**'
+if (!project.hasProperty('ossrhPassword'))      ext.ossrhPassword       = System.getenv('SONATYPE_PASSWORD') ?: '**UNDEFINED**'
+if (!project.hasProperty('signingKeyId'))       ext.signingKeyId        = System.getenv('SIGNING_KEY_ID') ?: '**UNDEFINED**'
+if (!project.hasProperty('signingPassword'))    ext.signingPassword     = System.getenv('SIGNING_PASSWORD') ?: '**UNDEFINED**'
+if (!project.hasProperty('signingSecretKey'))   ext.signingSecretKey    = System.getenv('SIGNING_SECRET_KEY_PATH') ? rootProject.file(System.getenv('SIGNING_SECRET_KEY_PATH')).text : '**UNDEFINED**'
+
+config {
+    release = (rootProject.findProperty('release') ?: false).toBoolean()
+
+    info {
+        name        = 'Micronaut Permissions'
+        vendor      = 'Agorapulse'
+        description = 'Micronaut Permissions Library'
+
+        links {
+            website      = "https://github.com/" + slug
+            issueTracker = "https://github.com/" + slug + "/issues"
+            scm          = "https://github.com/" + slug + ".git"
+        }
+
+        people {
+            person {
+                id    = 'musketyr'
+                name  = 'Vladimir Orany'
+                roles = ['developer']
+            }
+        }
+
+        repositories {
+            repository {
+                name = 'localRelease'
+                url  = "" + project.rootProject.buildDir + "/repos/local/release"
+            }
+            repository {
+                name = 'localSnapshot'
+                url  = "" + project.rootProject.buildDir + "/repos/local/snapshot"
+            }
+        }
+    }
+
+    licensing {
+        licenses {
+            license {
+                id = 'Apache-2.0'
+            }
+        }
+    }
+
+    publishing {
+        enabled = false
+        signing {
+            enabled = true
+            keyId = signingKeyId
+            secretKey = signingSecretKey
+            password = signingPassword
+        }
+        releasesRepository  = 'localRelease'
+        snapshotsRepository = 'localSnapshot'
+    }
+
+    quality {
+        checkstyle {
+            toolVersion = '8.27'
+        }
+
+        codenarc {
+            toolVersion = '1.5'
+        }
+    }
+
+    docs {
+        groovydoc {
+            enabled = false
+            aggregate {
+                enabled = false
+            }
+        }
+    }
+
+}
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            nexusUrl = uri('https://s01.oss.sonatype.org/service/local/')
+            snapshotRepositoryUrl = uri('https://s01.oss.sonatype.org/content/repositories/snapshots/')
+            username = ossrhUsername
+            password = ossrhPassword
+        }
+    }
+}
+
+allprojects {
+    repositories {
+        mavenCentral()
+    }
+
+    license {
+        exclude '**/*.json'
+        exclude '***.yml'
+    }
+}
+
+projects {
+    subprojects {
+        dirs(['libs', 'examples']) { Project subproject ->
+            sourceCompatibility = 1.8
+            targetCompatibility = 1.8
+
+            repositories {
+                mavenCentral()
+            }
+
+            // location independent tests (useful for stable CI builds)
+            tasks.withType(Test) {
+                useJUnitPlatform()
+
+                systemProperty 'user.timezone', 'UTC'
+                systemProperty 'user.language', 'en'
+            }
+
+            tasks.withType(JavaCompile) {
+                options.encoding = "UTF-8"
+                options.compilerArgs.add('-parameters')
+            }
+
+            tasks.withType(GroovyCompile) {
+                groovyOptions.forkOptions.jvmArgs.add('-Dgroovy.parameters=true')
+            }
+
+            dependencies {
+                api platform("org.codehaus.groovy:groovy-bom:$groovyVersion")
+                compile platform("org.codehaus.groovy:groovy-bom:$groovyVersion")
+                implementation platform("org.codehaus.groovy:groovy-bom:$groovyVersion")
+                compileOnly platform("org.codehaus.groovy:groovy-bom:$groovyVersion")
+                testCompile platform("org.codehaus.groovy:groovy-bom:$groovyVersion")
+                testImplementation platform("org.codehaus.groovy:groovy-bom:$groovyVersion")
+
+                annotationProcessor platform("io.micronaut:micronaut-bom:$micronautVersion")
+                annotationProcessor "io.micronaut:micronaut-inject-java"
+
+                implementation platform("io.micronaut:micronaut-bom:$micronautVersion")
+                implementation "io.micronaut:micronaut-runtime"
+
+                testAnnotationProcessor platform("io.micronaut:micronaut-bom:$micronautVersion")
+                testAnnotationProcessor "io.micronaut:micronaut-inject-java"
+
+                testImplementation platform("io.micronaut:micronaut-bom:$micronautVersion")
+
+                testImplementation "org.junit.jupiter:junit-jupiter-api"
+                testImplementation "io.micronaut.test:micronaut-test-junit5"
+                testImplementation("org.spockframework:spock-core")
+                testImplementation "org.codehaus.groovy:groovy:$groovyVersion"
+
+                testImplementation "io.micronaut:micronaut-inject-groovy"
+                testImplementation "io.micronaut.test:micronaut-test-spock"
+                testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
+                testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.5.0"
+            }
+
+            // useful for IntelliJ
+            task cleanOut(type: Delete) {
+                delete file('out')
+            }
+
+            clean.dependsOn cleanOut
+        }
+
+        dir('libs') {
+            processResources {
+                filesMatching('**/org.codehaus.groovy.runtime.ExtensionModule') {
+                    filter(org.apache.tools.ant.filters.ReplaceTokens, tokens: [VERSION: version])
+                }
+            }
+
+            jar {
+                manifest.attributes provider: 'gradle'
+            }
+
+            config {
+                publishing {
+                    enabled = true
+                }
+            }
+
+            dependencies {
+                testImplementation group: 'org.spockframework', name: 'spock-core', version: spockVersion
+            }
+        }
+    }
+}
+
+check.dependsOn('aggregateCheckstyle', 'aggregateCodenarc', 'aggregateAllTestReports', 'coveralls')
