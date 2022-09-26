@@ -1,0 +1,10 @@
+com.agorapulse.slack
+com.agorapulse.slack.example.commander
+com.agorapulse.slack.example.sender
+com.agorapulse.slack.example.sender.interactive
+com.agorapulse.slack.handlers
+com.agorapulse.slack.http
+com.agorapulse.slack.install
+com.agorapulse.slack.install.enumerate
+com.agorapulse.slack.install.event
+com.agorapulse.slack.oauth

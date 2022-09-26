@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.10">
+<meta name="author" content="Vladimir Orany">
+<title>Micronaut Slack Library</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+.hidden {
+    display: none;
+}
+
+.switch {
+    border-width: 1px 1px 0 1px;
+    border-style: solid;
+    border-color: #7a2518;
+    display: inline-block;
+}
+
+.switch--item {
+    padding: 10px;
+    background-color: #ffffff;
+    color: #7a2518;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.switch--item.selected {
+    background-color: #7a2519;
+    color: #ffffff;
+}
+
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/zepto/1.2.0/zepto.min.js"></script>
+<script type="text/javascript">
+function addBlockSwitches() {
+    $('.primary').each(function() {
+        primary = $(this);
+        createSwitchItem(primary, createBlockSwitch(primary)).item.addClass("selected");
+        primary.children('.title').remove();
+    });
+    $('.secondary').each(function(idx, node) {
+        secondary = $(node);
+        primary = findPrimary(secondary);
+        switchItem = createSwitchItem(secondary, primary.children('.switch'));
+        switchItem.content.addClass('hidden');
+        findPrimary(secondary).append(switchItem.content);
+        secondary.remove();
+    });
+}
+
+function createBlockSwitch(primary) {
+    blockSwitch = $('<div class="switch"></div>');
+    primary.prepend(blockSwitch);
+    return blockSwitch;
+}
+
+function findPrimary(secondary) {
+    candidate = secondary.prev();
+    while (!candidate.is('.primary')) {
+        candidate = candidate.prev();
+    }
+    return candidate;
+}
+
+function createSwitchItem(block, blockSwitch) {
+    blockName = block.children('.title').text();
+    content = block.children('.content').first().append(block.next('.colist'));
+    item = $('<div class="switch--item">' + blockName + '</div>');
+    item.on('click', '', content, function(e) {
+        $(this).addClass('selected');
+        $(this).siblings().removeClass('selected');
+        e.data.siblings('.content').addClass('hidden');
+        e.data.removeClass('hidden');
+    });
+    blockSwitch.append(item);
+    return {'item': item, 'content': content};
+}
+
+$(addBlockSwitches);
+
+</script>
+
+</head>
+<body class="book toc2 toc-left">
+<div id="header">
+<h1>Micronaut Slack Library</h1>
+<div class="details">
+<span id="author" class="author">Vladimir Orany</span><br>
+<span id="revnumber">version 2.0.4-micronaut-3.0</span>
+</div>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_installation_">1. Installation</a></li>
+<li><a href="#_introduction">2. Introduction</a></li>
+<li><a href="#_examples">3. Examples</a>
+<ul class="sectlevel2">
+<li><a href="#_sending_messages_to_slack">3.1. Sending Messages to Slack</a></li>
+<li><a href="#_listening_to_commands">3.2. Listening to Commands</a></li>
+<li><a href="#_interactive_installed_application">3.3. Interactive Installed Application</a></li>
+</ul>
+</li>
+<li><a href="#_links">4. Links</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_installation_"><a class="anchor" href="#_installation_"></a>1. Installation</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // for sending messages and other simple integration
+    implemenation 'com.agorapulse:micronaut-slack-core:2.0.4-micronaut-3.0'
+
+    // for providing own webhooks, event handlers and OAuth workflow
+    implemenation 'com.agorapulse:micronaut-slack-http:2.0.4-micronaut-3.0'
+    implemenation 'io.micronaut:micronaut-http-server-netty'
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_introduction"><a class="anchor" href="#_introduction"></a>2. Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Micronaut Slack is more idiomatic alternative to <a href="https://slack.dev/java-slack-sdk/guides/supported-web-frameworks#micronaut">Bolt Micronaut</a> library
+for <a href="https://api.slack.com">Slack API</a> integration into the Micronaut applications.</p>
+</div>
+<div class="paragraph">
+<p>The main difference compared to <a href="https://slack.dev/java-slack-sdk/guides/supported-web-frameworks#micronaut">Bolt Micronaut</a></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Using <a href="https://docs.micronaut.io/latest/guide/#config">Micronaut configuration chain</a> to configure Bolt&#8217;s <code>AppConfig</code></p>
+</li>
+<li>
+<p>Main bolt classes such as <code>Slack</code>, <code>App</code> and <code>MethodsClient</code> available as beans</p>
+</li>
+<li>
+<p>Ability to define handlers as standalone beans out of the box</p>
+</li>
+<li>
+<p>Beans to list all installed applications</p>
+</li>
+<li>
+<p>Events for pre/post bot installation</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_examples"><a class="anchor" href="#_examples"></a>3. Examples</h2>
+<div class="sectionbody">
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+This documentation contains example application manifest files which helps you to create the Slack Application. See more <a href="https://api.slack.com/reference/manifests">Create and configure apps with manifests</a>. Visit <a href="https://api.slack.com/apps?new_app=1">Create an app &gt; From an app manifest</a> to create new application using the manifest.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>You can manage your Slack applications at <a href="https://api.slack.com/apps">Your Apps</a> page.</p>
+</div>
+<div class="sect2">
+<h3 id="_sending_messages_to_slack"><a class="anchor" href="#_sending_messages_to_slack"></a>3.1. Sending Messages to Slack</h3>
+<div class="paragraph">
+<p>The most simple example of the application is the one that only sends messages to the Slack workspace.
+You can use a following manifest to create such application:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="yaml">display_information:
+  name: Micronaut Messenger
+features:
+  bot_user:
+    display_name: Micronaut Messenger
+    always_online: false
+oauth_config:
+  scopes:
+    bot:
+      - channels:read
+      - chat:write
+      - chat:write.public
+settings:
+  org_deploy_enabled: false
+  socket_mode_enabled: false
+  token_rotation_enabled: false</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The only requirement for the application is to have the bot token configured. You get the token once you install your application into your workspace under Settings &gt; Install App. Then provide the token either as
+<code>SLACK_BOT_TOKEN</code> environment variable or in the <code>application.yml</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="yaml">slack:
+  bot-token: xoxb-bot-token</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can inject <code>MessagesClient</code> or <code>AsyncMessagesClient</code> into your beans to perform operations against Slack API.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="java">package com.agorapulse.slack.example.sender;
+
+import com.slack.api.methods.MethodsClient;
+import com.slack.api.methods.SlackApiException;
+import com.slack.api.methods.response.conversations.ConversationsListResponse;
+import com.slack.api.model.Conversation;
+
+import jakarta.inject.Singleton;
+import java.io.IOException;
+import java.util.Optional;
+
+@Singleton
+public class MessageSender {
+
+    private final MethodsClient methods;
+
+    public MessageSender(MethodsClient methods) {                                       <i class="conum" data-value="1"></i><b>(1)</b>
+        this.methods = methods;
+    }
+
+    public void sendMessage(String message) throws SlackApiException, IOException {
+        ConversationsListResponse conversations = methods.conversationsList(b -&gt; b);
+        Optional&lt;Conversation&gt; generalChannel = conversations                           <i class="conum" data-value="2"></i><b>(2)</b>
+            .getChannels()
+            .stream()
+            .filter(Conversation::isGeneral)
+            .findAny();
+        if (generalChannel.isPresent()) {
+            methods.chatPostMessage(m -&gt; m.
+                text(message).channel(generalChannel.get().getId())                     <i class="conum" data-value="3"></i><b>(3)</b>
+            );
+        }
+    }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Inject <code>MethodsClient</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Find the proper destination channel</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Post a simple message into the channel</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_listening_to_commands"><a class="anchor" href="#_listening_to_commands"></a>3.2. Listening to Commands</h3>
+<div class="paragraph">
+<p>Another type of application is the one that handles execution of the slash commands. You will need to make your application
+accessible from the internet. Free and easy way is to use <a href="https://theboroer.github.io/localtunnel-www/">Localtunnel</a> utility.
+Don&#8217;t forget to change the URLs when you deploy your applications to production.</p>
+</div>
+<div class="paragraph">
+<p>Create new application from the following manifest:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="yaml">display_information:
+  name: Micronaut Commander
+features:
+  bot_user:
+    display_name: Micronaut Commander
+    always_online: false
+  slash_commands:
+    - command: /commander
+      # npm install -g localtunnel
+      # lt -p 8080 -s micronaut-commander
+      url: https://micronaut-commander.loca.lt/slack/events
+      description: Micronaut Commander
+      usage_hint: ahoy
+      should_escape: false
+oauth_config:
+  scopes:
+    bot:
+      - commands
+settings:
+  org_deploy_enabled: false
+  socket_mode_enabled: false
+  token_rotation_enabled: false</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The subdomain used with <code>lt -s</code> must be the same as the one in the application settings.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Package <code>com.agorapulse.slack.handlers</code> contains various interfaces that you can implement to get self-registered
+handlers of various Slack events. For handling Slash command events we need to implement <code>MicronautSlashCommandHandler</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="java">package com.agorapulse.slack.example.commander;
+
+import com.agorapulse.slack.handlers.MicronautSlashCommandHandler;
+import com.slack.api.bolt.context.builtin.SlashCommandContext;
+import com.slack.api.bolt.request.builtin.SlashCommandRequest;
+import com.slack.api.bolt.response.Response;
+import io.micronaut.core.util.StringUtils;
+
+import jakarta.inject.Singleton;
+
+@Singleton
+public class CommandHandler implements MicronautSlashCommandHandler {                   <i class="conum" data-value="1"></i><b>(1)</b>
+
+    @Override
+    public String getCommandId() {
+        return "/commander";                                                            <i class="conum" data-value="2"></i><b>(2)</b>
+    }
+
+    @Override
+    public Response apply(
+        SlashCommandRequest slashCommandRequest,
+        SlashCommandContext context
+    ) {
+        String salutation = StringUtils.capitalize(slashCommandRequest.getPayload().getText());
+        return context.ack(salutation + " to you, sailor!");                            <i class="conum" data-value="3"></i><b>(3)</b>
+    }
+
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Implement <code>MicronautSlashCommandHandler</code> bean</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The slash command to trigger the handler</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Use the context object for immediate response</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_interactive_installed_application"><a class="anchor" href="#_interactive_installed_application"></a>3.3. Interactive Installed Application</h3>
+<div class="paragraph">
+<p>Create a new application from the following manifest:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="yaml">display_information:
+  name: Micronaut Interactive Messenger
+features:
+  bot_user:
+    display_name: Micronaut Interactive Messenger
+    always_online: false
+oauth_config:
+  scopes:
+    bot:
+      - channels:read
+      - chat:write
+      - chat:write.public
+settings:
+  interactivity:
+    is_enabled: true
+    # npm install -g localtunnel
+    # lt -p 8080 -s micronaut-interactive-messenger
+    request_url: https://micronaut-interactive-messenger.loca.lt/slack/events
+  org_deploy_enabled: false
+  socket_mode_enabled: false
+  token_rotation_enabled: false</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The subdomain used with <code>lt -s</code> must be the same as the one in the application settings.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>To distribute your application you need active public distribution under Settings &gt; Manage Distributions.
+Then you can find all the secrets on the home page of your Slack application. Fill the secrets in your <code>application.yml</code> file.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="yaml">slack:
+  signing-secret: s3cret                                                                <i class="conum" data-value="1"></i><b>(1)</b>
+  scope: channels:read,chat:write,chat:write.public                                     <i class="conum" data-value="2"></i><b>(2)</b>
+  oauth-install-path: /slack/install                                                    <i class="conum" data-value="3"></i><b>(3)</b>
+  oauth-redirect-uri-path: /slack/oauth_redirect                                        <i class="conum" data-value="4"></i><b>(4)</b>
+  client-id: the-client-id                                                              <i class="conum" data-value="5"></i><b>(5)</b>
+  client-secret: the-client-secret                                                      <i class="conum" data-value="6"></i><b>(6)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Signing secret to verify incoming events</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>OAuth scopes to be requested</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>OAuth install path, use <code>/slack/install</code> unless you define your own controller</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>OAuth redirect path, use <code>/slack/oauth_redirect</code> unless you define your own controller</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Slack application client ID</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Slack application client secret</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>You can&#8217;t simply use the injected <code>MethodsClient</code> when working with distributed application. Use <code>DistributedAppMethodsClientFactory</code>
+to create the authenticated instance instead. Here is the example of a bean which posts messages to every installed
+workspace after the application is started.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="java">package com.agorapulse.slack.example.sender.interactive;
+
+import com.agorapulse.slack.install.enumerate.InstallationEnumerationService;
+import com.agorapulse.slack.oauth.DistributedAppMethodsClientFactory;
+import com.slack.api.bolt.model.Bot;
+import com.slack.api.methods.MethodsClient;
+import com.slack.api.methods.SlackApiException;
+import com.slack.api.methods.response.conversations.ConversationsListResponse;
+import com.slack.api.model.Conversation;
+import io.micronaut.runtime.event.ApplicationStartupEvent;
+import io.micronaut.runtime.event.annotation.EventListener;
+
+import jakarta.inject.Singleton;
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+
+import static com.slack.api.model.block.Blocks.actions;
+import static com.slack.api.model.block.Blocks.header;
+import static com.slack.api.model.block.composition.BlockCompositions.plainText;
+import static com.slack.api.model.block.element.BlockElements.button;
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
+
+@Singleton
+public class MessageSender {
+
+    private final DistributedAppMethodsClientFactory factory;                           <i class="conum" data-value="1"></i><b>(1)</b>
+    private final InstallationEnumerationService enumerationService;                    <i class="conum" data-value="2"></i><b>(2)</b>
+
+    public MessageSender(
+        DistributedAppMethodsClientFactory factory,
+        InstallationEnumerationService enumerationService
+    ) {
+        this.factory = factory;
+        this.enumerationService = enumerationService;
+    }
+
+    @EventListener
+    public void sendMessage(ApplicationStartupEvent event) throws SlackApiException, IOException {
+        List&lt;Bot&gt; allBots = enumerationService.findAllBots().collect(toList());         <i class="conum" data-value="3"></i><b>(3)</b>
+        for (Bot bot : allBots) {
+            MethodsClient methods = factory
+                .createClient(bot)                                                      <i class="conum" data-value="4"></i><b>(4)</b>
+                .orElseThrow(() -&gt; new IllegalStateException("Should not happen"));
+
+            ConversationsListResponse channels = methods.conversationsList(b -&gt; b);     <i class="conum" data-value="5"></i><b>(5)</b>
+            Optional&lt;Conversation&gt; generalChannel = channels
+                .getChannels()
+                .stream()
+                .filter(Conversation::isGeneral)
+                .findAny();
+
+            if (generalChannel.isPresent()) {
+                methods.chatPostMessage(m -&gt; m                                          <i class="conum" data-value="6"></i><b>(6)</b>
+                    .channel(generalChannel.get().getId())
+                    .blocks(asList(
+                        header(b -&gt; b.text(plainText("Micronaut is awesome, WDYT?"))),  <i class="conum" data-value="7"></i><b>(7)</b>
+                        actions(asList(
+                            button(b -&gt; b.actionId("#mn-yes").text(plainText("Yes"))),  <i class="conum" data-value="8"></i><b>(8)</b>
+                            button(b -&gt; b.actionId("#mn-no").text(plainText("No")))
+                        ))
+                    ))
+                );
+            }
+        }
+    }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>DistributedAppMethodsClientFactory</code> allows you to create <code>MethodsClient</code> authenticated against given Slack team</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td><code>InstallationEnumerationService</code> allows you to enumerate all current bot installations</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Collect all existing <code>Bot</code> configurations</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Create authenticated <code>MethodsClient</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>List all channels in the team</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>Post a chat message using the builder</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>Create plain text header</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td>Add some interactive buttons</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>You need to implement <code>MicronautBlockActionHandler</code> to handle the interactive actions.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="java">package com.agorapulse.slack.example.sender.interactive;
+
+import com.agorapulse.slack.handlers.MicronautBlockActionHandler;
+import com.slack.api.app_backend.interactive_components.payload.BlockActionPayload;
+import com.slack.api.bolt.context.builtin.ActionContext;
+import com.slack.api.bolt.request.builtin.BlockActionRequest;
+import com.slack.api.bolt.response.Response;
+
+import jakarta.inject.Singleton;
+import java.io.IOException;
+import java.util.Optional;
+import java.util.regex.Pattern;
+
+@Singleton
+public class MessageActionHandler implements MicronautBlockActionHandler {              <i class="conum" data-value="1"></i><b>(1)</b>
+
+    @Override
+    public Pattern getActionIdPattern() {
+        return Pattern.compile("#mn-.*");                                               <i class="conum" data-value="2"></i><b>(2)</b>
+    }
+
+    @Override
+    public Response apply(
+        BlockActionRequest blockActionRequest,
+        ActionContext context
+    ) throws IOException {
+        Optional&lt;BlockActionPayload.Action&gt; firstAction = blockActionRequest            <i class="conum" data-value="3"></i><b>(3)</b>
+            .getPayload()
+            .getActions()
+            .stream()
+            .findFirst();
+
+        if (firstAction.isPresent()) {
+            BlockActionPayload.Action action = firstAction.get();
+            if ("#mn-yes".equals(action.getActionId())) {                               <i class="conum" data-value="4"></i><b>(4)</b>
+                context.respond("Same do I!");                                          <i class="conum" data-value="5"></i><b>(5)</b>
+            } else if ("#mn-no".equals(action.getActionId())) {
+                context.respond("I'm sorry to hear that!");
+            } else {
+                context.respond("I don't know what you mean!");
+            }
+        }
+        return context.ack();
+    }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Implement <code>MicronautBlockActionHandler</code> interface</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Specify the pattern to match the action ids</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Get the first matched action</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Check the actual action ID</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Respond with immediate message</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_links"><a class="anchor" href="#_links"></a>4. Links</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="api/index.html" target="_blank" rel="noopener">Javadoc</a></p>
+</div>
+<div class="paragraph">
+<p><a href="api-html/index.html" target="_blank" rel="noopener">Source</a></p>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version 2.0.4-micronaut-3.0<br>
+Last updated 2022-09-26 20:04:18 UTC
+</div>
+</div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/run_prettify.min.js"></script>
+</body>
+</html>
