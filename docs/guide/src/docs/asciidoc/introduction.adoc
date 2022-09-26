@@ -10,3 +10,5 @@ The main difference compared to https://slack.dev/java-slack-sdk/guides/supporte
 * Using https://docs.micronaut.io/latest/guide/#config[Micronaut configuration chain] to configure Bolt's `AppConfig`
 * Main bolt classes such as `Slack`, `App` and `MethodsClient` available as beans
 * Ability to define handlers as standalone beans out of the box
+* Beans to list all installed applications
+* Events for pre/post bot installation

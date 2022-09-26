@@ -1,6 +1,7 @@
 slack:
-  scope: channels:read,chat:write,chat:write.public
-  oauth-install-path: /slack/install
-  oauth-redirect-uri-path: /slack/oauth_redirect
-  client-id: the-client-id
-  client-secret: the-client-secret
+  signing-secret: s3cret                                                                // <1>
+  scope: channels:read,chat:write,chat:write.public                                     // <2>
+  oauth-install-path: /slack/install                                                    // <3>
+  oauth-redirect-uri-path: /slack/oauth_redirect                                        // <4>
+  client-id: the-client-id                                                              // <5>
+  client-secret: the-client-secret                                                      // <6>

@@ -1,4 +1,115 @@
 
-[[_usage]]
-= Usage
+[[_examples]]
+= Examples
 
+TIP: This documentation contains example application manifest files which helps you to create the Slack Application. See more https://api.slack.com/reference/manifests[Create and configure apps with manifests]. Visit https://api.slack.com/apps?new_app=1[Create an app > From an app manifest] to create new application using the manifest.
+
+You can manage your Slack applications at https://api.slack.com/apps[Your Apps] page.
+
+== Sending Messages to Slack
+
+The most simple example of the application is the one that only sends messages to the Slack workspace.
+You can use a following manifest to create such application:
+
+[source,yaml]
+----
+include::{root-dir}/examples/message-sender/src/main/resources/slack-manifest.yml[]
+----
+
+The only requirement for the application is to have the bot token configured. You get the token once you install your application into your workspace under Settings > Install App. Then provide the token either as
+`SLACK_BOT_TOKEN` environment variable or in the `application.yml`.
+
+[source,yaml]
+----
+include::{root-dir}/examples/message-sender/src/main/resources/application.yml[]
+----
+
+You can inject `MessagesClient` or `AsyncMessagesClient` into your beans to perform operations against Slack API.
+
+[source,java]
+----
+include::{root-dir}/examples/message-sender/src/main/java/com/agorapulse/slack/example/sender/MessageSender.java[lines=18..-1]
+----
+<1> Inject `MethodsClient`
+<2> Find the proper destination channel
+<3> Post a simple message into the channel
+
+== Listening to Commands
+
+Another type of application is the one that handles execution of the slash commands. You will need to make your application
+accessible from the internet. Free and easy way is to use https://theboroer.github.io/localtunnel-www/[Localtunnel] utility.
+Don't forget to change the URLs when you deploy your applications to production.
+
+Create new application from the following manifest:
+
+[source,yaml]
+----
+include::{root-dir}/examples/commander/src/main/resources/slack-manifest.yml[]
+----
+
+NOTE: The subdomain used with `lt -s` must be the same as the one in the application settings.
+
+Package `com.agorapulse.slack.handlers` contains various interfaces that you can implement to get self-registered
+handlers of various Slack events. For handling Slash command events we need to implement `MicronautSlashCommandHandler`:
+
+[source,java]
+----
+include::{root-dir}/examples/commander/src/main/java/com/agorapulse/slack/example/commander/CommandHandler.java[lines=18..-1]
+----
+<1> Implement `MicronautSlashCommandHandler` bean
+<2> The slash command to trigger the handler
+<3> Use the context object for immediate response
+
+== Interactive Installed Application
+
+Create a new application from the following manifest:
+
+[source,yaml]
+----
+include::{root-dir}/examples/message-sender-interactive/src/main/resources/slack-manifest.yml[]
+----
+
+NOTE: The subdomain used with `lt -s` must be the same as the one in the application settings.
+
+To distribute your application you need active public distribution under Settings > Manage Distributions.
+Then you can find all the secrets on the home page of your Slack application. Fill the secrets in your `application.yml` file.
+
+[source,yaml]
+----
+include::{root-dir}/examples/message-sender-interactive/src/main/resources/application.yml[]
+----
+<1> Signing secret to verify incoming events
+<2> OAuth scopes to be requested
+<3> OAuth install path, use `/slack/install` unless you define your own controller
+<4> OAuth redirect path, use `/slack/oauth_redirect` unless you define your own controller
+<5> Slack application client ID
+<6> Slack application client secret
+
+You can't simply use the injected `MethodsClient` when working with distributed application. Use `DistributedAppMethodsClientFactory`
+to create the authenticated instance instead. Here is the example of a bean which posts messages to every installed
+workspace after the application is started.
+
+[source,java]
+----
+include::{root-dir}/examples/message-sender-interactive/src/main/java/com/agorapulse/slack/example/sender/interactive/MessageSender.java[lines=18..-1]
+----
+<1> `DistributedAppMethodsClientFactory` allows you to create `MethodsClient` authenticated against given Slack team
+<2> `InstallationEnumerationService` allows you to enumerate all current bot installations
+<3> Collect all existing `Bot` configurations
+<4> Create authenticated `MethodsClient`
+<5> List all channels in the team
+<6> Post a chat message using the builder
+<7> Create plain text header
+<8> Add some interactive buttons
+
+You need to implement `MicronautBlockActionHandler` to handle the interactive actions.
+
+[source,java]
+----
+include::{root-dir}/examples/message-sender-interactive/src/main/java/com/agorapulse/slack/example/sender/interactive/MessageActionHandler.java[lines=18..-1]
+----
+<1> Implement `MicronautBlockActionHandler` interface
+<2> Specify the pattern to match the action ids
+<3> Get the first matched action
+<4> Check the actual action ID
+<5> Respond with immediate message
