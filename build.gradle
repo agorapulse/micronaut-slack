@@ -33,9 +33,9 @@ config {
     release = (rootProject.findProperty('release') ?: false).toBoolean()
 
     info {
-        name        = 'Micronaut Permissions'
+        name        = 'Micronaut Slack'
         vendor      = 'Agorapulse'
-        description = 'Micronaut Permissions Library'
+        description = 'Micronaut Slack Library'
 
         links {
             website      = "https://github.com/" + slug
