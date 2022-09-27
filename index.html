@@ -181,6 +181,21 @@ This documentation contains example application manifest files which helps you t
 <div class="paragraph">
 <p>You can manage your Slack applications at <a href="https://api.slack.com/apps">Your Apps</a> page.</p>
 </div>
+<div class="paragraph">
+<p>Some examples require that your application is
+accessible from the internet. Free and easy way is to use <a href="https://theboroer.github.io/localtunnel-www/">Localtunnel</a> utility.
+Don&#8217;t forget to change the URLs when you deploy your applications to production. You can install Localtunnel using the following commands</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="bash"># if you don't have NodeJS installed, you can use NVM to install the latest distribution
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+# install Localtunnel as a global lt command
+npm install -g localtunnel
+# use localtunnel, your app will be available as https://your-custom-subdomain.loca.lt
+lt -p 8080 -s your-custom-subdomain</code></pre>
+</div>
+</div>
 <div class="sect2">
 <h3 id="_sending_messages_to_slack"><a class="anchor" href="#_sending_messages_to_slack"></a>3.1. Sending Messages to Slack</h3>
 <div class="paragraph">
@@ -672,7 +687,7 @@ public class MessageActionHandler implements MicronautBlockActionHandler {      
 <div id="footer">
 <div id="footer-text">
 Version 1.0.1-micronaut-3.0<br>
-Last updated 2022-09-26 20:09:22 UTC
+Last updated 2022-09-27 04:42:42 UTC
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">
