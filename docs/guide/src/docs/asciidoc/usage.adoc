@@ -6,6 +6,20 @@ TIP: This documentation contains example application manifest files which helps 
 
 You can manage your Slack applications at https://api.slack.com/apps[Your Apps] page.
 
+Some examples require that your application is
+accessible from the internet. Free and easy way is to use https://theboroer.github.io/localtunnel-www/[Localtunnel] utility.
+Don't forget to change the URLs when you deploy your applications to production. You can install Localtunnel using the following commands
+
+[source,bash]
+----
+# if you don't have NodeJS installed, you can use NVM to install the latest distribution
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+# install Localtunnel as a global lt command
+npm install -g localtunnel
+# use localtunnel, your app will be available as https://your-custom-subdomain.loca.lt
+lt -p 8080 -s your-custom-subdomain
+----
+
 == Sending Messages to Slack
 
 The most simple example of the application is the one that only sends messages to the Slack workspace.
