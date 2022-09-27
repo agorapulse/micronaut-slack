@@ -92,7 +92,7 @@ $(addBlockSwitches);
 <h1>Micronaut Slack Library</h1>
 <div class="details">
 <span id="author" class="author">Vladimir Orany</span><br>
-<span id="revnumber">version 1.0.1-micronaut-3.0</span>
+<span id="revnumber">version 1.0.2-micronaut-3.0</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -103,7 +103,11 @@ $(addBlockSwitches);
 <ul class="sectlevel2">
 <li><a href="#_sending_messages_to_slack">3.1. Sending Messages to Slack</a></li>
 <li><a href="#_listening_to_commands">3.2. Listening to Commands</a></li>
-<li><a href="#_interactive_installed_application">3.3. Interactive Installed Application</a></li>
+<li><a href="#_interactive_installed_application">3.3. Interactive Installed Application</a>
+<ul class="sectlevel3">
+<li><a href="#_using_s3_storage">3.3.1. Using S3 Storage</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li><a href="#_links">4. Links</a></li>
@@ -122,10 +126,10 @@ $(addBlockSwitches);
 
 dependencies {
     // for sending messages and other simple integration
-    implemenation 'com.agorapulse:micronaut-slack-core:1.0.1-micronaut-3.0'
+    implemenation 'com.agorapulse:micronaut-slack-core:1.0.2-micronaut-3.0'
 
     // for providing own webhooks, event handlers and OAuth workflow
-    implemenation 'com.agorapulse:micronaut-slack-http:1.0.1-micronaut-3.0'
+    implemenation 'com.agorapulse:micronaut-slack-http:1.0.2-micronaut-3.0'
     implemenation 'io.micronaut:micronaut-http-server-netty'
 }</code></pre>
 </div>
@@ -669,6 +673,35 @@ public class MessageActionHandler implements MicronautBlockActionHandler {      
 </tr>
 </table>
 </div>
+<div class="sect3">
+<h4 id="_using_s3_storage"><a class="anchor" href="#_using_s3_storage"></a>3.3.1. Using S3 Storage</h4>
+<div class="paragraph">
+<p>OAuth-enabled application can store information about the OAuth in Amazon S3 bucket. The application
+requires having <code>slack.bucket</code> property set and <code>AmazonS3</code> bean must be available. The easiest solution is to add
+<a href="https://agorapulse.github.io/micronaut-aws-sdk/#_simple_storage_service_s3">Micronaut AWS SDK Simple Storage Service for AWS SDK v1</a> on the classpath. You also need to have the AWS credentials set up correctly and
+the bucket must already exist.</p>
+</div>
+<div class="listingblock">
+<div class="title">build.gradle</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="groovy">dependencies {
+    implementation 'com.agorapulse:micronaut-aws-sdk-s3:2.0.4-micronaut-3.0'
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">application.yml</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="yaml">aws:
+    access-key: AMAZON_KEY_ID
+    secret-key: AWS_SECRET_KEY_ABCDEF
+
+slack:
+    bucket: mydata.example.com
+# the rest of slack configuration (see above)</code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -686,8 +719,8 @@ public class MessageActionHandler implements MicronautBlockActionHandler {      
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 1.0.1-micronaut-3.0<br>
-Last updated 2022-09-27 04:46:46 UTC
+Version 1.0.2-micronaut-3.0<br>
+Last updated 2022-09-27 07:36:31 UTC
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">
