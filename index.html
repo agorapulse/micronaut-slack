@@ -407,6 +407,8 @@ features:
     display_name: Micronaut Interactive Messenger
     always_online: false
 oauth_config:
+  redirect_urls:
+    - https://micronaut-interactive-messenger.loca.lt/slack/oauth_redirect
   scopes:
     bot:
       - channels:read
@@ -415,8 +417,6 @@ oauth_config:
 settings:
   interactivity:
     is_enabled: true
-    # npm install -g localtunnel
-    # lt -p 8080 -s micronaut-interactive-messenger
     request_url: https://micronaut-interactive-messenger.loca.lt/slack/events
   org_deploy_enabled: false
   socket_mode_enabled: false
@@ -687,7 +687,7 @@ public class MessageActionHandler implements MicronautBlockActionHandler {      
 <div id="footer">
 <div id="footer-text">
 Version 1.0.1-micronaut-3.0<br>
-Last updated 2022-09-27 04:42:42 UTC
+Last updated 2022-09-27 04:46:46 UTC
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">
