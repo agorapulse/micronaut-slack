@@ -25,6 +25,16 @@ import io.micronaut.context.annotation.ConfigurationProperties;
 @ConfigurationProperties("slack")
 public class SlackConfiguration extends AppConfig {
 
+    private String bucket;
+
+    public String getBucket() {
+        return bucket;
+    }
+
+    public void setBucket(String bucket) {
+        this.bucket = bucket;
+    }
+
     // more idiomatic setters e.g. oauth-foo instead of o-auth-foo and bot-token shortcut
 
     public void setOauthRedirectUriPageRenderer(OAuthRedirectUriPageRenderer oAuthRedirectUriPageRenderer) {

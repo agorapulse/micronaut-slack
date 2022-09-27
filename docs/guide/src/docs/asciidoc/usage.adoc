@@ -127,3 +127,31 @@ include::{root-dir}/examples/message-sender-interactive/src/main/java/com/agorap
 <3> Get the first matched action
 <4> Check the actual action ID
 <5> Respond with immediate message
+
+=== Using S3 Storage
+
+OAuth-enabled application can store information about the OAuth in Amazon S3 bucket. The application
+requires having `slack.bucket` property set and `AmazonS3` bean must be available. The easiest solution is to add
+https://agorapulse.github.io/micronaut-aws-sdk/#_simple_storage_service_s3[Micronaut AWS SDK Simple Storage Service for AWS SDK v1] on the classpath. You also need to have the AWS credentials set up correctly and
+the bucket must already exist.
+
+
+[source,groovy]
+.build.gradle
+----
+dependencies {
+    implementation 'com.agorapulse:micronaut-aws-sdk-s3:2.0.4-micronaut-3.0'
+}
+----
+
+[source,yaml]
+.application.yml
+----
+aws:
+    access-key: AMAZON_KEY_ID
+    secret-key: AWS_SECRET_KEY_ABCDEF
+
+slack:
+    bucket: mydata.example.com
+# the rest of slack configuration (see above)
+----

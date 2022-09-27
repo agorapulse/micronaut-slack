@@ -37,12 +37,18 @@ import com.agorapulse.slack.handlers.MicronautViewSubmissionHandler;
 import com.agorapulse.slack.handlers.MicronautWorkflowStepEditHandler;
 import com.agorapulse.slack.handlers.MicronautWorkflowStepExecuteHandler;
 import com.agorapulse.slack.handlers.MicronautWorkflowStepSaveHandler;
+import com.amazonaws.services.s3.AmazonS3;
 import com.slack.api.Slack;
 import com.slack.api.SlackConfig;
 import com.slack.api.bolt.App;
+import com.slack.api.bolt.Initializer;
 import com.slack.api.bolt.model.Bot;
 import com.slack.api.bolt.service.InstallationService;
+import com.slack.api.bolt.service.OAuthStateService;
+import com.slack.api.bolt.service.builtin.AmazonS3InstallationService;
+import com.slack.api.bolt.service.builtin.AmazonS3OAuthStateService;
 import com.slack.api.bolt.service.builtin.FileInstallationService;
+import com.slack.api.bolt.service.builtin.FileOAuthStateService;
 import com.slack.api.methods.AsyncMethodsClient;
 import com.slack.api.methods.MethodsClient;
 import com.slack.api.model.event.Event;
@@ -50,11 +56,17 @@ import com.slack.api.util.http.SlackHttpClient;
 import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Context;
 import io.micronaut.context.annotation.Factory;
+import io.micronaut.context.annotation.Requires;
+import io.micronaut.context.annotation.Secondary;
 import io.micronaut.core.util.StringUtils;
 
+import javax.annotation.Nullable;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /**
  * Creates all the necessary beans in the Micronaut context.
@@ -100,8 +112,71 @@ public class SlackFactory {
 
     @Bean
     @Singleton
+    @Secondary
+    public OAuthStateService oAuthStateService(SlackConfiguration configuration) {
+        return new FileOAuthStateService(configuration);
+    }
+
+    @Bean
+    @Singleton
+    @Requires(classes = AmazonS3.class)
+    public OAuthStateService s3OAuthStateService(
+        SlackConfiguration configuration,
+        @Nullable @Named("slack") AmazonS3 slackAmazonS3,
+        @Nullable AmazonS3 amazonS3
+    ) {
+        return createServiceIfS3Configured(configuration, slackAmazonS3, amazonS3, this::oAuthStateService, (bucket, s3) -> new AmazonS3OAuthStateService(bucket) {
+
+            @Override
+            public Initializer initializer() {
+                return app -> {
+                    boolean bucketExists = createS3Client().doesBucketExistV2(bucket);
+                    if (!bucketExists) {
+                        throw new IllegalStateException("Failed to access the Amazon S3 bucket (name: " + bucket + ")");
+                    }
+                };
+            }
+
+            @Override
+            protected AmazonS3 createS3Client() {
+                return s3;
+            }
+
+        });
+    }
+
+    @Bean
+    @Singleton
+    @Secondary
     public InstallationService installationService(SlackConfiguration slackConfiguration) {
         return new FileInstallationService(slackConfiguration);
+    }
+
+    @Bean
+    @Singleton
+    @Requires(classes = AmazonS3.class)
+    public InstallationService s3InstallationService(
+        SlackConfiguration configuration,
+        @Nullable @Named("slack") AmazonS3 slackAmazonS3,
+        @Nullable AmazonS3 amazonS3
+    ) {
+        return createServiceIfS3Configured(configuration, slackAmazonS3, amazonS3, this::installationService, (bucket, s3) -> new AmazonS3InstallationService(bucket) {
+            @Override
+            public Initializer initializer() {
+                return app -> {
+                    boolean bucketExists = createS3Client().doesBucketExistV2(bucket);
+                    if (!bucketExists) {
+                        throw new IllegalStateException("Failed to access the Amazon S3 bucket (name: " + bucket + ")");
+                    }
+                };
+            }
+
+            @Override
+            protected AmazonS3 createS3Client() {
+                return s3;
+            }
+
+        });
     }
 
     @Bean
@@ -163,6 +238,7 @@ public class SlackFactory {
         SlackConfiguration configuration,
         Slack slack,
         InstallationService installationService,
+        OAuthStateService oAuthStateService,
         List<MicronautAttachmentActionHandler> attachmentActionHandlers,
         List<MicronautBlockActionHandler> blockActionHandlers,
         List<MicronautBlockSuggestionHandler> blockSuggestionHandlers,
@@ -198,6 +274,7 @@ public class SlackFactory {
         boltEventHandlers.forEach(h -> app.event(h.getEventType(), h));
 
         app.service(installationService);
+        app.service(oAuthStateService);
 
         return app;
     }
@@ -214,6 +291,20 @@ public class SlackFactory {
         }
 
         return new App(configuration);
+    }
+
+    private <T> T createServiceIfS3Configured(SlackConfiguration configuration, AmazonS3 slackS3, AmazonS3 defaultS3, Function<SlackConfiguration, T> defaultService, BiFunction<String, AmazonS3, T> creator) {
+        if (StringUtils.isEmpty(configuration.getBucket())) {
+            return defaultService.apply(configuration);
+        }
+
+        AmazonS3 s3 = slackS3 == null ? defaultS3 : slackS3;
+
+        if (s3 == null) {
+            return  defaultService.apply(configuration);
+        }
+
+        return creator.apply(configuration.getBucket(), s3);
     }
 
 }
