@@ -21,6 +21,7 @@ import com.slack.api.bolt.AppConfig;
 import com.slack.api.bolt.service.builtin.oauth.view.OAuthInstallPageRenderer;
 import com.slack.api.bolt.service.builtin.oauth.view.OAuthRedirectUriPageRenderer;
 import io.micronaut.context.annotation.ConfigurationProperties;
+import io.micronaut.core.util.StringUtils;
 
 @ConfigurationProperties("slack")
 public class SlackConfiguration extends AppConfig {
@@ -68,6 +69,8 @@ public class SlackConfiguration extends AppConfig {
     }
 
     public void setBotToken(String singleTeamBotToken) {
-        super.setSingleTeamBotToken(singleTeamBotToken);
+        if (StringUtils.isNotEmpty(singleTeamBotToken)) {
+            super.setSingleTeamBotToken(singleTeamBotToken);
+        }
     }
 }
