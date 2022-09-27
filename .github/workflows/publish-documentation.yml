@@ -21,7 +21,7 @@ jobs:
         uses: abatilo/release-info-action@v1.3.0
         with:
           owner: agorapulse
-          repo: micronaut-aws-sdk
+          repo: micronaut-slack
       - name: Publish GitHub Pages
         uses: eskatos/gradle-command-action@v2
         with:
