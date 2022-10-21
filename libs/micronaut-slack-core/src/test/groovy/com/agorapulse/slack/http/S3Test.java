@@ -33,7 +33,6 @@ import javax.inject.Inject;
 
 @MicronautTest
 @Property(name = "slack.bucket", value = S3Test.BUCKET_NAME)
-@Property(name = "slack.bucket", value = S3Test.BUCKET_NAME)
 public class S3Test {
 
     public static final String BUCKET_NAME = "slack-installations.test.agorapulse.com";
