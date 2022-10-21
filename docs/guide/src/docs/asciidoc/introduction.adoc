@@ -12,3 +12,4 @@ The main difference compared to https://slack.dev/java-slack-sdk/guides/supporte
 * Ability to define handlers as standalone beans out of the box
 * Beans to list all installed applications
 * Events for pre/post bot installation
+* Preventing Bolt event duplicate handling

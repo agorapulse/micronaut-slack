@@ -17,3 +17,5 @@ dependencies {
     implemenation 'io.micronaut:micronaut-http-server-netty'
 }
 ----
+
+TIP: Install https://micronaut-projects.github.io/micronaut-cache/snapshot/guide/[Micronaut Cache] and configure `slack-events` cache for more sophisticated duplicate events protection.
