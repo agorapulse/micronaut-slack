@@ -1,4 +1,5 @@
 com.agorapulse.slack
+com.agorapulse.slack.event
 com.agorapulse.slack.example.commander
 com.agorapulse.slack.example.sender
 com.agorapulse.slack.example.sender.interactive
