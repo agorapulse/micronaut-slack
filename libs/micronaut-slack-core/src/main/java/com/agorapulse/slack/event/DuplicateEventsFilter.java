@@ -15,12 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-plugins {
-    id 'application'
-}
+package com.agorapulse.slack.event;
 
-dependencies {
-    implementation project(':micronaut-slack-http')
-    implementation 'io.micronaut:micronaut-http-server-netty'
-    implementation 'ch.qos.logback:logback-classic:1.4.1'
+public interface DuplicateEventsFilter {
+
+    boolean isRunning(String eventId);
+    void start(String eventId);
+    void finish(String eventId);
+
 }

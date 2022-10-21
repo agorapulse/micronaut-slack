@@ -17,6 +17,8 @@
  */
 package com.agorapulse.slack;
 
+import com.agorapulse.slack.event.DuplicateEventsFilter;
+import com.agorapulse.slack.event.RunOnceBoltEventHandler;
 import com.agorapulse.slack.install.ObservableInstallationService;
 import com.agorapulse.slack.install.enumerate.FileInstallationEnumerationService;
 import com.agorapulse.slack.install.enumerate.InstallationEnumerationService;
@@ -239,6 +241,7 @@ public class SlackFactory {
         Slack slack,
         InstallationService installationService,
         OAuthStateService oAuthStateService,
+        DuplicateEventsFilter duplicateEventsFilter,
         List<MicronautAttachmentActionHandler> attachmentActionHandlers,
         List<MicronautBlockActionHandler> blockActionHandlers,
         List<MicronautBlockSuggestionHandler> blockSuggestionHandlers,
@@ -271,7 +274,9 @@ public class SlackFactory {
         workflowStepEditHandlers.forEach(h -> app.workflowStepEdit(h.getCallbackIdPattern(), h));
         workflowStepExecuteHandlers.forEach(h -> app.workflowStepExecute(h.getPattern(), h));
         workflowStepSaveHandlers.forEach(h -> app.workflowStepSave(h.getCallbackIdPattern(), h));
-        boltEventHandlers.forEach(h -> app.event(h.getEventType(), h));
+
+        // prevent duplicates
+        boltEventHandlers.forEach(h -> app.event(h.getEventType(), new RunOnceBoltEventHandler<>(duplicateEventsFilter, h)));
 
         app.service(installationService);
         app.service(oAuthStateService);

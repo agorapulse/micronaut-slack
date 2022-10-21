@@ -8,14 +8,21 @@ oauth_config:
   redirect_urls:
     - https://micronaut-interactive-messenger.loca.lt/slack/oauth_redirect
   scopes:
+    user:
+      - reactions:read
     bot:
       - channels:read
       - chat:write
       - chat:write.public
 settings:
+  event_subscriptions:
+    request_url: https://micronaut-interactive-messenger.loca.lt/slack/events
+    user_events:
+      - reaction_added
   interactivity:
     is_enabled: true
     request_url: https://micronaut-interactive-messenger.loca.lt/slack/events
   org_deploy_enabled: false
   socket_mode_enabled: false
   token_rotation_enabled: false
+

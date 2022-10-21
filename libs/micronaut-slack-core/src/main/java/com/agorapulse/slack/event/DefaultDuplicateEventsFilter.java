@@ -15,12 +15,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-plugins {
-    id 'application'
-}
+package com.agorapulse.slack.event;
 
-dependencies {
-    implementation project(':micronaut-slack-http')
-    implementation 'io.micronaut:micronaut-http-server-netty'
-    implementation 'ch.qos.logback:logback-classic:1.4.1'
+import java.util.HashSet;
+import java.util.Set;
+
+public class DefaultDuplicateEventsFilter implements DuplicateEventsFilter {
+
+    private final Set<String> runningEvents = new HashSet<>();
+
+    @Override
+    public boolean isRunning(String eventId) {
+        return runningEvents.contains(eventId);
+    }
+
+    @Override
+    public void start(String eventId) {
+        runningEvents.add(eventId);
+    }
+
+    @Override
+    public void finish(String eventId) {
+        runningEvents.remove(eventId);
+    }
+
 }
