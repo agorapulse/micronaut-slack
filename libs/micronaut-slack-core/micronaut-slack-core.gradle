@@ -23,4 +23,9 @@ dependencies {
 
     testImplementation "com.agorapulse:micronaut-aws-sdk-s3:2.0.4-micronaut-${micronautVersion[0]}.0"
     testImplementation "com.agorapulse:micronaut-amazon-awssdk-integration-testing:2.0.4-micronaut-${micronautVersion[0]}.0"
+
+    if (!micronautVersion.startsWith("1")) {
+        compileOnly("io.micronaut.cache:micronaut-cache-core")
+        testImplementation("io.micronaut.cache:micronaut-cache-caffeine")
+    }
 }
