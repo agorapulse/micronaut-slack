@@ -20,15 +20,12 @@ package com.agorapulse.slack.http;
 import com.agorapulse.gru.Content;
 import com.agorapulse.gru.Gru;
 import com.agorapulse.gru.RequestDefinitionBuilder;
-import com.agorapulse.gru.micronaut.Micronaut;
 import com.slack.api.app_backend.SlackSignature;
 import io.micronaut.context.annotation.Property;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-
-import java.util.Collections;
 
 import static com.slack.api.app_backend.SlackSignature.HeaderNames.X_SLACK_REQUEST_TIMESTAMP;
 import static com.slack.api.app_backend.SlackSignature.HeaderNames.X_SLACK_SIGNATURE;
