@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2022 Agorapulse.
+ * Copyright 2022-2023 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ package com.agorapulse.slack.example.sender.interactive;
 import com.agorapulse.slack.install.event.BotSavedEvent;
 import io.micronaut.context.event.ApplicationEventListener;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 @Singleton
 public class BotSavedHandler implements ApplicationEventListener<BotSavedEvent> {

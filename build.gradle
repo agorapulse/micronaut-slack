@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2022 Agorapulse.
+ * Copyright 2022-2023 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,6 +94,14 @@ config {
     }
 
     docs {
+        javadoc {
+            autoLinks {
+                enabled = false
+            }
+            aggregate {
+                enabled = false
+            }
+        }
         groovydoc {
             enabled = false
             aggregate {
@@ -126,11 +134,22 @@ allprojects {
     }
 }
 
-projects {
+gradleProjects {
     subprojects {
         dirs(['libs', 'examples']) { Project subproject ->
-            sourceCompatibility = 1.8
-            targetCompatibility = 1.8
+            java {
+                toolchain {
+                    languageVersion = JavaLanguageVersion.of(17)
+                }
+            }
+
+            micronaut {
+                importMicronautPlatform = true
+                testRuntime 'spock'
+                processing {
+                    incremental false
+                }
+            }
 
             repositories {
                 mavenCentral()
@@ -154,33 +173,14 @@ projects {
             }
 
             dependencies {
-                api platform("org.codehaus.groovy:groovy-bom:$groovyVersion")
-                compile platform("org.codehaus.groovy:groovy-bom:$groovyVersion")
-                implementation platform("org.codehaus.groovy:groovy-bom:$groovyVersion")
-                compileOnly platform("org.codehaus.groovy:groovy-bom:$groovyVersion")
-                testCompile platform("org.codehaus.groovy:groovy-bom:$groovyVersion")
-                testImplementation platform("org.codehaus.groovy:groovy-bom:$groovyVersion")
-
-                annotationProcessor platform("io.micronaut:micronaut-bom:$micronautVersion")
                 annotationProcessor "io.micronaut:micronaut-inject-java"
-
-                implementation platform("io.micronaut:micronaut-bom:$micronautVersion")
-                implementation "io.micronaut:micronaut-runtime"
-
-                testAnnotationProcessor platform("io.micronaut:micronaut-bom:$micronautVersion")
-                testAnnotationProcessor "io.micronaut:micronaut-inject-java"
-
-                testImplementation platform("io.micronaut:micronaut-bom:$micronautVersion")
 
                 testImplementation "org.junit.jupiter:junit-jupiter-api"
                 testImplementation "io.micronaut.test:micronaut-test-junit5"
-                testImplementation("org.spockframework:spock-core")
-                testImplementation "org.codehaus.groovy:groovy:$groovyVersion"
 
                 testImplementation "io.micronaut:micronaut-inject-groovy"
-                testImplementation "io.micronaut.test:micronaut-test-spock"
                 testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
-                testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.5.0"
+                testRuntimeOnly "org.junit.vintage:junit-vintage-engine"
             }
 
             // useful for IntelliJ
@@ -207,9 +207,11 @@ projects {
                     enabled = true
                 }
             }
+        }
 
-            dependencies {
-                testImplementation group: 'org.spockframework', name: 'spock-core', version: spockVersion
+        dirs(['examples']){
+            micronaut {
+                runtime 'netty'
             }
         }
     }

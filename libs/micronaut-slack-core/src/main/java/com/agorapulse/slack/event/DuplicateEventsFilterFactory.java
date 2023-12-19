@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2022 Agorapulse.
+ * Copyright 2022-2023 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ import io.micronaut.context.annotation.Secondary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
-import javax.inject.Named;
-import javax.inject.Singleton;
+import jakarta.annotation.Nullable;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 
 @Factory
 public class DuplicateEventsFilterFactory {

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2022 Agorapulse.
+ * Copyright 2022-2023 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,22 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-plugins {
-    id 'org.gradle.test-retry' version '1.4.1'
-}
 dependencies {
     api "com.slack.api:bolt:$boltVersion"
 
     compileOnly 'com.amazonaws:aws-java-sdk-s3:1.12.153'
     testImplementation 'com.amazonaws:aws-java-sdk-s3:1.12.153'
 
-    testImplementation "com.agorapulse:micronaut-aws-sdk-s3:2.0.4-micronaut-${micronautVersion[0]}.0"
-    testImplementation "com.agorapulse:micronaut-amazon-awssdk-integration-testing:2.0.4-micronaut-${micronautVersion[0]}.0"
+    testImplementation "com.agorapulse:micronaut-aws-sdk-s3:3.0.1"
+    testImplementation "com.agorapulse:micronaut-amazon-awssdk-integration-testing:3.0.1"
 
-    if (!micronautVersion.startsWith('1')) {
-        compileOnly('io.micronaut.cache:micronaut-cache-core')
-        testImplementation('io.micronaut.cache:micronaut-cache-caffeine')
-    }
+    compileOnly('io.micronaut.cache:micronaut-cache-core')
+    testImplementation('io.micronaut.cache:micronaut-cache-caffeine')
 }
 
 test {
