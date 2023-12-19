@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2022 Agorapulse.
+ * Copyright 2022-2023 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,17 @@ dependencies {
     api project(':micronaut-slack-core')
     api 'io.micronaut:micronaut-http-server'
 
-    testImplementation "com.agorapulse:gru-micronaut:1.2.3"
+    implementation 'io.micronaut:micronaut-jackson-databind'
+
+    testImplementation 'com.agorapulse:gru-micronaut:2.0.5'
     testImplementation 'io.micronaut:micronaut-http-server-netty'
     testImplementation 'io.micronaut:micronaut-http-client'
     testImplementation 'org.mockito:mockito-core:4.8.0'
 
-    testImplementation 'org.eclipse.jetty:jetty-servlet:9.2.27.v20190403'
-    testImplementation 'org.eclipse.jetty:jetty-server:9.2.27.v20190403'
-    testImplementation 'org.eclipse.jetty:jetty-webapp:9.2.27.v20190403'
-    testImplementation 'org.apache.logging.log4j:log4j-slf4j18-impl:2.17.2'
+    testImplementation 'org.eclipse.jetty:jetty-servlet:11.0.18'
+    testImplementation 'org.eclipse.jetty:jetty-server:11.0.18'
+    testImplementation 'org.eclipse.jetty:jetty-webapp:11.0.18'
+    testImplementation 'org.apache.logging.log4j:log4j-slf4j2-impl:2.17.2'
 }
 
 repositories {

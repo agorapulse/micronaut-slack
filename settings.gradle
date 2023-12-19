@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2022 Agorapulse.
+ * Copyright 2022-2023 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,23 +32,20 @@ buildscript {
         classpath group: 'org.kordamp.gradle',          name: 'coveralls-gradle-plugin',        version: kordampPluginVersion
         classpath group: 'org.ajoberstar',              name: 'gradle-git-publish',             version: gitPublishPluginVersion
         classpath group: 'io.github.gradle-nexus',      name: 'publish-plugin',                 version: nexusPluginVersion
-        classpath group: 'com.agorapulse.gradle',       name: 'micronaut-compatibility',        version: agorapulseGradlePluginsVersion
+        classpath group: 'io.micronaut.gradle',         name: 'micronaut-minimal-plugin',       version: micronautGradlePluginVersion
     }
 }
 
 plugins {
     id 'org.kordamp.gradle.settings' version "$kordampPluginVersion"
-    id 'com.gradle.enterprise' version '3.6.1'
+    id 'com.gradle.enterprise' version '3.15.1'
 }
 
 gradleEnterprise {
     buildScan {
+        publishAlways()
         termsOfServiceUrl = "https://gradle.com/terms-of-service"
         termsOfServiceAgree = "yes"
-
-        buildScanPublished { scan ->
-            file("scan-journal.log") << "${new Date()} - ${scan.buildScanId} - ${scan.buildScanUri}\n"
-        }
     }
 }
 
@@ -62,10 +59,13 @@ projects {
             id 'org.kordamp.gradle.guide'
             id 'org.ajoberstar.git-publish'
         }
-        dirs(['libs', 'examples']) {
-            id 'java-library'
+        dirs(['libs']) {
+            id 'io.micronaut.minimal.library'
             id 'groovy'
-            id 'com.agorapulse.gradle.micronaut-compatibility'
+        }
+        dirs(['examples']) {
+            id 'io.micronaut.minimal.application'
+            id 'groovy'
         }
     }
 }

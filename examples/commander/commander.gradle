@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2022 Agorapulse.
+ * Copyright 2022-2023 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,4 +19,5 @@ dependencies {
     implementation project(':micronaut-slack-http')
     implementation 'io.micronaut:micronaut-http-server-netty'
     implementation 'ch.qos.logback:logback-classic:1.4.1'
+    implementation 'org.yaml:snakeyaml'
 }

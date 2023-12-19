@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2022 Agorapulse.
+ * Copyright 2022-2023 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,8 +49,8 @@ public class SlackAppController {
     }
 
     @Post(value = "/events", consumes = {MediaType.APPLICATION_FORM_URLENCODED, MediaType.APPLICATION_JSON})
-    public HttpResponse<String> events(HttpRequest<String> request, @Body String body) throws Exception {
-        return adapt(request, body);
+    public HttpResponse<String> events(HttpRequest<String> request) throws Exception {
+        return adapt(request, request.getBody().orElse(null));
     }
 
     @Get("/install")

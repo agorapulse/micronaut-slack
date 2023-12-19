@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2022 Agorapulse.
+ * Copyright 2022-2023 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ package com.agorapulse.slack.http;
 import com.slack.api.bolt.AppConfig;
 import com.slack.api.bolt.request.Request;
 import com.slack.api.bolt.response.Response;
-import io.micronaut.core.convert.DefaultConversionService;
+import io.micronaut.core.convert.ConversionService;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.simple.SimpleHttpHeaders;
@@ -48,11 +48,11 @@ public class AdapterTest {
         HttpRequest<String> req = mock(HttpRequest.class);
         Map<String, String> rawHeaders = new HashMap<>();
         rawHeaders.put("X-Slack-Signature", "xxxxxxx");
-        SimpleHttpHeaders headers = new SimpleHttpHeaders(rawHeaders, new DefaultConversionService());
+        SimpleHttpHeaders headers = new SimpleHttpHeaders(rawHeaders, ConversionService.SHARED);
         when(req.getHeaders()).thenReturn(headers);
         Map<CharSequence, List<String>> params = new HashMap<>();
         params.put("foo", Arrays.asList("bar", "baz"));
-        SimpleHttpParameters parameters = new SimpleHttpParameters(params, new DefaultConversionService());
+        SimpleHttpParameters parameters = new SimpleHttpParameters(params, ConversionService.SHARED);
         when(req.getParameters()).thenReturn(parameters);
 
         Request<?> slackRequest = adapter.toSlackRequest(req, "token=random&ssl_check=1");

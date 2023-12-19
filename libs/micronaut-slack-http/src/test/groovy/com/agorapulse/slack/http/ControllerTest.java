@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2022 Agorapulse.
+ * Copyright 2022-2023 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import com.slack.api.Slack;
 import com.slack.api.SlackConfig;
 import com.slack.api.bolt.App;
 import com.slack.api.bolt.AppConfig;
-import io.micronaut.core.convert.DefaultConversionService;
+import io.micronaut.core.convert.ConversionService;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.MutableHttpParameters;
@@ -34,6 +34,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
+import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -74,12 +75,13 @@ public class ControllerTest {
         assertNotNull(controller);
 
         HttpRequest<String> req = mock(HttpRequest.class);
-        SimpleHttpHeaders headers = new SimpleHttpHeaders(new HashMap<>(), new DefaultConversionService());
+        SimpleHttpHeaders headers = new SimpleHttpHeaders(new HashMap<>(), ConversionService.SHARED);
         when(req.getHeaders()).thenReturn(headers);
-        SimpleHttpParameters parameters = new SimpleHttpParameters(new HashMap<>(), new DefaultConversionService());
+        SimpleHttpParameters parameters = new SimpleHttpParameters(new HashMap<>(), ConversionService.SHARED);
         when(req.getParameters()).thenReturn(parameters);
+        when(req.getBody()).thenReturn(Optional.of("token=random&ssl_check=1"));
 
-        HttpResponse<String> response = controller.events(req, "token=random&ssl_check=1");
+        HttpResponse<String> response = controller.events(req);
         assertEquals(200, response.getStatus().getCode());
     }
 
