@@ -155,7 +155,7 @@ public class SlackFactory {
      */
     @Bean
     @Singleton
-    public AsyncMethodsClient asyncMethodsClient(Slack slack, SlackConfiguration configuration) {
+    public AsyncMethodsClient asyncMethodsClientx(Slack slack, SlackConfiguration configuration) {
         if (StringUtils.isNotEmpty(configuration.getSingleTeamBotToken())) {
             return slack.methodsAsync(configuration.getSingleTeamBotToken());
         }
