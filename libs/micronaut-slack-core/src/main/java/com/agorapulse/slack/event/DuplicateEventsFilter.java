@@ -17,10 +17,34 @@
  */
 package com.agorapulse.slack.event;
 
+/**
+ * Service responsible for tracking and managing duplicate event executions.
+ * <p>
+ * This interface helps prevent duplicate processing of the same Slack event,
+ * which can occur due to Slack's retry mechanisms or other network issues.
+ */
 public interface DuplicateEventsFilter {
 
+    /**
+     * Checks if processing for the given event ID is currently in progress.
+     *
+     * @param eventId the unique Slack event identifier
+     * @return true if the event is currently being processed, false otherwise
+     */
     boolean isRunning(String eventId);
+    
+    /**
+     * Marks the beginning of processing for the given event ID.
+     *
+     * @param eventId the unique Slack event identifier
+     */
     void start(String eventId);
+    
+    /**
+     * Marks the completion of processing for the given event ID.
+     *
+     * @param eventId the unique Slack event identifier
+     */
     void finish(String eventId);
 
 }

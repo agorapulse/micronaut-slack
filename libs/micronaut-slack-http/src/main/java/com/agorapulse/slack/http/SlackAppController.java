@@ -47,11 +47,31 @@ public class SlackAppController {
         this.adapter = adapter;
     }
 
+    /**
+     * Handles all Slack events sent to the /events endpoint.
+     * <p>
+     * This endpoint receives events from Slack including commands, actions, and
+     * webhook events. It supports both application/json and form-urlencoded requests.
+     *
+     * @param request the HTTP request containing a Slack API payload
+     * @return HTTP response to send back to Slack
+     * @throws Exception if there's an error processing the request
+     */
     @Post(value = "/events", consumes = {MediaType.APPLICATION_FORM_URLENCODED, MediaType.APPLICATION_JSON})
     public HttpResponse<String> events(HttpRequest<String> request) throws Exception {
         return adapt(request, request.getBody().orElse(null));
     }
 
+    /**
+     * Handles OAuth installation flow initiation.
+     * <p>
+     * This endpoint starts the OAuth flow that allows users to install
+     * this Slack app to their workspace.
+     *
+     * @param request the HTTP request
+     * @return HTTP response with the OAuth authorization page or 404 if OAuth install is disabled
+     * @throws Exception if there's an error processing the request
+     */
     @Get("/install")
     public HttpResponse<String> install(HttpRequest<String> request) throws Exception {
         if (!slackApp.config().isOAuthInstallPathEnabled()) {
@@ -60,6 +80,16 @@ public class SlackAppController {
         return adapt(request, null);
     }
 
+    /**
+     * Handles OAuth redirect after app installation approval.
+     * <p>
+     * This endpoint receives the OAuth callback from Slack after a user has
+     * approved the installation of the app in their workspace.
+     *
+     * @param request the HTTP request containing OAuth verification code
+     * @return HTTP response completing the OAuth flow or 404 if OAuth redirect is disabled
+     * @throws Exception if there's an error processing the request
+     */
     @Get("/oauth_redirect")
     public HttpResponse<String> oauthRedirect(HttpRequest<String> request) throws Exception {
         if (!slackApp.config().isOAuthRedirectUriPathEnabled()) {
@@ -68,6 +98,14 @@ public class SlackAppController {
         return adapt(request, null);
     }
 
+    /**
+     * Converts Micronaut HTTP requests to Slack Bolt requests and processes them.
+     *
+     * @param request the Micronaut HTTP request
+     * @param body the request body content, or null for GET requests
+     * @return a Micronaut HTTP response adapted from the Slack Bolt response
+     * @throws Exception if there's an error during request processing
+     */
     private HttpResponse<String> adapt(HttpRequest<String> request, String body) throws Exception {
         Request<?> slackRequest = adapter.toSlackRequest(request, body);
         return adapter.toMicronautResponse(slackApp.run(slackRequest));

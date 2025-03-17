@@ -71,29 +71,69 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
- * Creates all the necessary beans in the Micronaut context.
+ * Factory class that creates and configures all necessary Slack API beans for the Micronaut context.
+ * <p>
+ * This factory initializes and registers essential Slack API components such as:
+ * <ul>
+ *   <li>Slack API clients and HTTP clients</li>
+ *   <li>Installation services for storing app installations</li>
+ *   <li>OAuth state services for managing OAuth flows</li>
+ *   <li>Methods clients for sending API requests to Slack</li>
+ *   <li>The central Bolt App instance with properly configured handlers</li>
+ * </ul>
+ * <p>
+ * The factory automatically detects and registers handler beans from the Micronaut context
+ * and supports both single-team and multi-team (distributed) Slack applications.
  */
 @Factory
 public class SlackFactory {
 
+    /**
+     * Creates the default Slack API configuration.
+     *
+     * @return the default Slack API configuration
+     */
     @Bean
     @Singleton
     public SlackConfig slackConfig() {
         return SlackConfig.DEFAULT;
     }
 
+    /**
+     * Creates the HTTP client used for Slack API requests.
+     *
+     * @param config the Slack API configuration
+     * @return configured HTTP client for Slack API calls
+     */
     @Bean
     @Singleton
     public SlackHttpClient slackHttpClient(SlackConfig config) {
         return SlackHttpClient.buildSlackHttpClient(config);
     }
 
+    /**
+     * Creates the main Slack API client instance.
+     * <p>
+     * This is the core client used for all Slack API interactions.
+     *
+     * @return the Slack API client instance
+     */
     @Bean
     @Singleton
     public Slack slack() {
         return Slack.getInstance();
     }
 
+    /**
+     * Creates a MethodsClient for making synchronous API calls to Slack.
+     * <p>
+     * If a single team bot token is configured, the client will be pre-configured with that token.
+     * Otherwise, a token-less client is returned that requires tokens to be provided with each call.
+     *
+     * @param slack the Slack API client
+     * @param configuration the Slack configuration
+     * @return a configured methods client
+     */
     @Bean
     @Singleton
     public MethodsClient methodsClient(Slack slack, SlackConfiguration configuration) {
@@ -103,9 +143,19 @@ public class SlackFactory {
         return slack.methods();
     }
 
+    /**
+     * Creates an AsyncMethodsClient for making asynchronous API calls to Slack.
+     * <p>
+     * If a single team bot token is configured, the client will be pre-configured with that token.
+     * Otherwise, a token-less client is returned that requires tokens to be provided with each call.
+     *
+     * @param slack the Slack API client
+     * @param configuration the Slack configuration
+     * @return a configured asynchronous methods client
+     */
     @Bean
     @Singleton
-    public AsyncMethodsClient asyncMethodsClientx(Slack slack, SlackConfiguration configuration) {
+    public AsyncMethodsClient asyncMethodsClient(Slack slack, SlackConfiguration configuration) {
         if (StringUtils.isNotEmpty(configuration.getSingleTeamBotToken())) {
             return slack.methodsAsync(configuration.getSingleTeamBotToken());
         }

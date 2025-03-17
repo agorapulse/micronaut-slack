@@ -23,6 +23,14 @@ import com.slack.api.bolt.service.builtin.oauth.view.OAuthRedirectUriPageRendere
 import io.micronaut.context.annotation.ConfigurationProperties;
 import io.micronaut.core.util.StringUtils;
 
+/**
+ * Micronaut configuration properties for Slack Bolt app integration.
+ * <p>
+ * This class extends the Slack Bolt AppConfig and provides more idiomatic setters
+ * for OAuth configuration while also adding Micronaut-specific properties like Amazon S3 bucket.
+ * <p>
+ * Configuration is loaded from application.yml under the "slack" prefix.
+ */
 @ConfigurationProperties("slack")
 public class SlackConfiguration extends AppConfig {
 
