@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2022-2023 Agorapulse.
+ * Copyright 2022-2025 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,14 +32,14 @@ public interface DuplicateEventsFilter {
      * @return true if the event is currently being processed, false otherwise
      */
     boolean isRunning(String eventId);
-    
+
     /**
      * Marks the beginning of processing for the given event ID.
      *
      * @param eventId the unique Slack event identifier
      */
     void start(String eventId);
-    
+
     /**
      * Marks the completion of processing for the given event ID.
      *
