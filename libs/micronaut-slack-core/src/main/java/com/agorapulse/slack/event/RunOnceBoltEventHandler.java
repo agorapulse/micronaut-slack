@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2022-2023 Agorapulse.
+ * Copyright 2022-2025 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,18 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+/**
+ * Decorator for Bolt event handlers that ensures each event is processed exactly once.
+ * <p>
+ * This implementation wraps any BoltEventHandler and uses the DuplicateEventsFilter to track
+ * event processing state. When Slack retries sending an event (indicated by non-null retry count),
+ * this handler will prevent duplicate processing if the original event is still being processed.
+ * <p>
+ * This is particularly useful for long-running event handlers and helps prevent race conditions
+ * that can occur with Slack's retry mechanisms.
+ *
+ * @param <E> the type of Event this handler processes
+ */
 public class RunOnceBoltEventHandler<E extends Event> implements BoltEventHandler<E> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RunOnceBoltEventHandler.class);

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2022-2023 Agorapulse.
+ * Copyright 2022-2025 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,22 @@ import com.slack.api.bolt.model.Bot;
 
 import java.util.stream.Stream;
 
+/**
+ * Service that provides enumeration capabilities for installed Slack applications.
+ * <p>
+ * This interface allows applications to discover and iterate through all bot installations
+ * across workspaces, which is particularly useful for distributed Slack applications
+ * that need to access multiple workspaces.
+ */
 public interface InstallationEnumerationService {
+    /**
+     * Finds and returns a stream of all bot installations accessible to this service.
+     * <p>
+     * This method allows listing all bots across workspaces, enabling operations
+     * that need to work with multiple workspaces simultaneously.
+     *
+     * @return a stream of Bot objects representing all installed bots
+     */
     Stream<Bot> findAllBots();
 
 }

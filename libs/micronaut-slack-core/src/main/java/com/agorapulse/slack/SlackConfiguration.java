@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2022-2023 Agorapulse.
+ * Copyright 2022-2025 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,14 @@ import com.slack.api.bolt.service.builtin.oauth.view.OAuthRedirectUriPageRendere
 import io.micronaut.context.annotation.ConfigurationProperties;
 import io.micronaut.core.util.StringUtils;
 
+/**
+ * Micronaut configuration properties for Slack Bolt app integration.
+ * <p>
+ * This class extends the Slack Bolt AppConfig and provides more idiomatic setters
+ * for OAuth configuration while also adding Micronaut-specific properties like Amazon S3 bucket.
+ * <p>
+ * Configuration is loaded from application.yml under the "slack" prefix.
+ */
 @ConfigurationProperties("slack")
 public class SlackConfiguration extends AppConfig {
 
