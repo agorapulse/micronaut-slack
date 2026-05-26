@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2022-2023 Agorapulse.
+ * Copyright 2022-2026 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,19 +18,18 @@
 dependencies {
     api "com.slack.api:bolt:$boltVersion"
 
-    compileOnly 'com.amazonaws:aws-java-sdk-s3:1.12.153'
-    testImplementation 'com.amazonaws:aws-java-sdk-s3:1.12.153'
-
-    testImplementation "com.agorapulse:micronaut-aws-sdk-s3:3.0.1"
-    testImplementation "com.agorapulse:micronaut-amazon-awssdk-integration-testing:3.0.1"
+    // AWS SDK v2 — kept as compile-only so downstream consumers can opt in.
+    compileOnly 'software.amazon.awssdk:s3'
 
     compileOnly('io.micronaut.cache:micronaut-cache-core')
     testImplementation('io.micronaut.cache:micronaut-cache-caffeine')
-}
 
-test {
-    retry {
-        maxRetries = 2
-        maxFailures = 20
-    }
+    // Agorapulse Micronaut 5 AWS S3 integration + LocalStack-based integration testing.
+    testImplementation 'com.agorapulse:micronaut-amazon-awssdk-s3:5.0.0.RC2'
+    testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:5.0.0.RC2'
+
+    // JUnit 5 + Micronaut JUnit 5 extension (for the Java S3Test)
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testImplementation 'io.micronaut.test:micronaut-test-junit5'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }

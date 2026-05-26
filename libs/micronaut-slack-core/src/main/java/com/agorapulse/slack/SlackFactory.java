@@ -20,6 +20,8 @@ package com.agorapulse.slack;
 import com.agorapulse.slack.event.DuplicateEventsFilter;
 import com.agorapulse.slack.event.RunOnceBoltEventHandler;
 import com.agorapulse.slack.install.ObservableInstallationService;
+import com.agorapulse.slack.install.S3InstallationService;
+import com.agorapulse.slack.install.S3OAuthStateService;
 import com.agorapulse.slack.install.enumerate.FileInstallationEnumerationService;
 import com.agorapulse.slack.install.enumerate.InstallationEnumerationService;
 import com.agorapulse.slack.oauth.DistributedAppAsyncMethodsClientFactory;
@@ -39,18 +41,15 @@ import com.agorapulse.slack.handlers.MicronautViewSubmissionHandler;
 import com.agorapulse.slack.handlers.MicronautWorkflowStepEditHandler;
 import com.agorapulse.slack.handlers.MicronautWorkflowStepExecuteHandler;
 import com.agorapulse.slack.handlers.MicronautWorkflowStepSaveHandler;
-import com.amazonaws.services.s3.AmazonS3;
 import com.slack.api.Slack;
 import com.slack.api.SlackConfig;
 import com.slack.api.bolt.App;
-import com.slack.api.bolt.Initializer;
 import com.slack.api.bolt.model.Bot;
 import com.slack.api.bolt.service.InstallationService;
 import com.slack.api.bolt.service.OAuthStateService;
-import com.slack.api.bolt.service.builtin.AmazonS3InstallationService;
-import com.slack.api.bolt.service.builtin.AmazonS3OAuthStateService;
 import com.slack.api.bolt.service.builtin.FileInstallationService;
 import com.slack.api.bolt.service.builtin.FileOAuthStateService;
+import software.amazon.awssdk.services.s3.S3Client;
 import com.slack.api.methods.AsyncMethodsClient;
 import com.slack.api.methods.MethodsClient;
 import com.slack.api.model.event.Event;
@@ -121,30 +120,13 @@ public class SlackFactory {
 
     @Bean
     @Singleton
-    @Requires(classes = AmazonS3.class)
+    @Requires(classes = S3Client.class)
     public OAuthStateService s3OAuthStateService(
         SlackConfiguration configuration,
-        @Nullable @Named("slack") AmazonS3 slackAmazonS3,
-        @Nullable AmazonS3 amazonS3
+        @Nullable @Named("slack") S3Client slackS3Client,
+        @Nullable S3Client s3Client
     ) {
-        return createServiceIfS3Configured(configuration, slackAmazonS3, amazonS3, this::oAuthStateService, (bucket, s3) -> new AmazonS3OAuthStateService(bucket) {
-
-            @Override
-            public Initializer initializer() {
-                return app -> {
-                    boolean bucketExists = createS3Client().doesBucketExistV2(bucket);
-                    if (!bucketExists) {
-                        throw new IllegalStateException("Failed to access the Amazon S3 bucket (name: " + bucket + ")");
-                    }
-                };
-            }
-
-            @Override
-            protected AmazonS3 createS3Client() {
-                return s3;
-            }
-
-        });
+        return createServiceIfS3Configured(configuration, slackS3Client, s3Client, this::oAuthStateService, S3OAuthStateService::new);
     }
 
     @Bean
@@ -156,29 +138,13 @@ public class SlackFactory {
 
     @Bean
     @Singleton
-    @Requires(classes = AmazonS3.class)
+    @Requires(classes = S3Client.class)
     public InstallationService s3InstallationService(
         SlackConfiguration configuration,
-        @Nullable @Named("slack") AmazonS3 slackAmazonS3,
-        @Nullable AmazonS3 amazonS3
+        @Nullable @Named("slack") S3Client slackS3Client,
+        @Nullable S3Client s3Client
     ) {
-        return createServiceIfS3Configured(configuration, slackAmazonS3, amazonS3, this::installationService, (bucket, s3) -> new AmazonS3InstallationService(bucket) {
-            @Override
-            public Initializer initializer() {
-                return app -> {
-                    boolean bucketExists = createS3Client().doesBucketExistV2(bucket);
-                    if (!bucketExists) {
-                        throw new IllegalStateException("Failed to access the Amazon S3 bucket (name: " + bucket + ")");
-                    }
-                };
-            }
-
-            @Override
-            protected AmazonS3 createS3Client() {
-                return s3;
-            }
-
-        });
+        return createServiceIfS3Configured(configuration, slackS3Client, s3Client, this::installationService, (s3, bucket) -> new S3InstallationService(s3, bucket));
     }
 
     @Bean
@@ -298,18 +264,18 @@ public class SlackFactory {
         return new App(configuration);
     }
 
-    private <T> T createServiceIfS3Configured(SlackConfiguration configuration, AmazonS3 slackS3, AmazonS3 defaultS3, Function<SlackConfiguration, T> defaultService, BiFunction<String, AmazonS3, T> creator) {
+    private <T> T createServiceIfS3Configured(SlackConfiguration configuration, S3Client slackS3, S3Client defaultS3, Function<SlackConfiguration, T> defaultService, BiFunction<S3Client, String, T> creator) {
         if (StringUtils.isEmpty(configuration.getBucket())) {
             return defaultService.apply(configuration);
         }
 
-        AmazonS3 s3 = slackS3 == null ? defaultS3 : slackS3;
+        S3Client s3 = slackS3 == null ? defaultS3 : slackS3;
 
         if (s3 == null) {
             return  defaultService.apply(configuration);
         }
 
-        return creator.apply(configuration.getBucket(), s3);
+        return creator.apply(s3, configuration.getBucket());
     }
 
 }
