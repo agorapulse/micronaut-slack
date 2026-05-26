@@ -18,14 +18,15 @@
 dependencies {
     api "com.slack.api:bolt:$boltVersion"
 
-    // AWS SDK v1 — kept as compile-only so downstream consumers can opt in.
-    compileOnly 'com.amazonaws:aws-java-sdk-s3:1.12.153'
-    testImplementation 'com.amazonaws:aws-java-sdk-s3:1.12.153'
+    // AWS SDK v2 — kept as compile-only so downstream consumers can opt in.
+    compileOnly 'software.amazon.awssdk:s3'
 
     compileOnly('io.micronaut.cache:micronaut-cache-core')
     testImplementation('io.micronaut.cache:micronaut-cache-caffeine')
 
-    testImplementation 'org.mockito:mockito-core:4.8.0'
+    // Agorapulse Micronaut 5 AWS S3 integration + LocalStack-based integration testing.
+    testImplementation 'com.agorapulse:micronaut-amazon-awssdk-s3:5.0.0.RC2'
+    testImplementation 'com.agorapulse:micronaut-amazon-awssdk-integration-testing:5.0.0.RC2'
 
     // JUnit 5 + Micronaut JUnit 5 extension (for the Java S3Test)
     testImplementation 'org.junit.jupiter:junit-jupiter-api'

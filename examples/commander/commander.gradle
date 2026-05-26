@@ -29,7 +29,3 @@ dependencies {
     implementation 'ch.qos.logback:logback-classic:1.4.1'
     implementation 'org.yaml:snakeyaml'
 }
-
-application {
-    mainClass.set('com.agorapulse.slack.example.commander.CommanderApplication')
-}

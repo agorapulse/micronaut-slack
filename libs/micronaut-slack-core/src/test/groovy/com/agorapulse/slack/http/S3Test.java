@@ -17,46 +17,77 @@
  */
 package com.agorapulse.slack.http;
 
-import com.agorapulse.slack.SlackConfiguration;
-import com.amazonaws.services.s3.AmazonS3;
-import com.slack.api.bolt.App;
+import com.agorapulse.micronaut.amazon.awssdk.s3.SimpleStorageService;
+import com.agorapulse.slack.install.ObservableInstallationService;
+import com.agorapulse.slack.install.S3InstallationService;
+import com.agorapulse.slack.install.S3OAuthStateService;
+import com.slack.api.bolt.service.InstallationService;
 import com.slack.api.bolt.service.OAuthStateService;
-import com.slack.api.bolt.service.builtin.AmazonS3OAuthStateService;
 import io.micronaut.context.ApplicationContext;
-import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Property;
-import io.micronaut.context.annotation.Replaces;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @MicronautTest
+@Property(name = "aws.s3.region", value = "us-east-1")
+@Property(name = "aws.s3.bucket", value = S3Test.BUCKET_NAME)
 @Property(name = "slack.bucket", value = S3Test.BUCKET_NAME)
 public class S3Test {
 
-    public static final String BUCKET_NAME = "slack-installations.test.agorapulse.com";
+    public static final String BUCKET_NAME = "slack-installations-test";
 
-    @Factory
-    static class AmazonS3MockFactory {
-        @Singleton
-        @Replaces(AmazonS3.class)
-        AmazonS3 amazonS3() {
-            AmazonS3 mock = Mockito.mock(AmazonS3.class);
-            Mockito.when(mock.doesBucketExistV2(Mockito.anyString())).thenReturn(true);
-            return mock;
+    @Inject ApplicationContext context;
+    @Inject SimpleStorageService storageService;
+
+    @BeforeEach
+    void setUp() {
+        if (!storageService.listBucketNames().contains(BUCKET_NAME)) {
+            storageService.createBucket(BUCKET_NAME);
         }
     }
 
-    @Inject ApplicationContext context;
-    @Inject App app;
-    @Inject SlackConfiguration slackConfiguration;
-
     @Test
-    void testS3ServicesInitialized() {
-        Assertions.assertTrue(context.getBean(OAuthStateService.class) instanceof AmazonS3OAuthStateService);
+    void s3OAuthStateServiceWiredAndOperational() {
+        OAuthStateService stateService = context.getBean(OAuthStateService.class);
+        assertTrue(stateService instanceof S3OAuthStateService,
+            "expected S3OAuthStateService, got " + stateService.getClass().getName());
+
+        // initializer should accept the bucket created above
+        stateService.initializer().accept(null);
+
+        // round-trip a state value
+        String state = "test-state-" + System.nanoTime();
+        assertFalse(stateService.isAvailableInDatabase(state));
+        try {
+            stateService.addNewStateToDatastore(state);
+            assertTrue(stateService.isAvailableInDatabase(state));
+            stateService.deleteStateFromDatastore(state);
+            assertFalse(stateService.isAvailableInDatabase(state));
+        } catch (Exception e) {
+            throw new AssertionError(e);
+        }
     }
 
+    @Test
+    void s3InstallationServiceWiredAndOperational() {
+        InstallationService installationService = context.getBean(InstallationService.class);
+        assertTrue(installationService instanceof ObservableInstallationService,
+            "expected ObservableInstallationService, got " + installationService.getClass().getName());
+        assertTrue(S3InstallationService.class.equals(
+            ((ObservableInstallationService) installationService).getDelegateType()),
+            "expected delegate to be S3InstallationService, got "
+                + ((ObservableInstallationService) installationService).getDelegateType().getName());
+
+        // initializer should accept the bucket created above
+        installationService.initializer().accept(null);
+
+        // a missing key returns null (no exception)
+        assertNotNull(installationService);
+    }
 }

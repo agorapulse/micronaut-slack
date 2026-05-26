@@ -21,8 +21,9 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHandler;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
 
 import java.io.IOException;
 import java.net.SocketException;
@@ -102,8 +103,9 @@ public class AuthTestMockServer {
     private void setup(int port) {
         this.port = port;
         this.server = new Server(this.port);
-        ServletHandler handler = new ServletHandler();
-        server.setHandler(handler);
+        ServletContextHandler contextHandler = new ServletContextHandler();
+        ServletHandler handler = contextHandler.getServletHandler();
+        server.setHandler(contextHandler);
         handler.addServletWithMapping(AuthTestMockEndpoint.class, "/*");
     }
 
