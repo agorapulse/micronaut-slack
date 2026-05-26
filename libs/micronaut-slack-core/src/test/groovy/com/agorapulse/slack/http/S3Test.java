@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2022-2023 Agorapulse.
+ * Copyright 2022-2026 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,21 @@
  */
 package com.agorapulse.slack.http;
 
-import com.agorapulse.micronaut.aws.s3.SimpleStorageService;
 import com.agorapulse.slack.SlackConfiguration;
+import com.amazonaws.services.s3.AmazonS3;
 import com.slack.api.bolt.App;
 import com.slack.api.bolt.service.OAuthStateService;
 import com.slack.api.bolt.service.builtin.AmazonS3OAuthStateService;
 import io.micronaut.context.ApplicationContext;
+import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Property;
+import io.micronaut.context.annotation.Replaces;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 @MicronautTest
 @Property(name = "slack.bucket", value = S3Test.BUCKET_NAME)
@@ -37,18 +39,20 @@ public class S3Test {
 
     public static final String BUCKET_NAME = "slack-installations.test.agorapulse.com";
 
+    @Factory
+    static class AmazonS3MockFactory {
+        @Singleton
+        @Replaces(AmazonS3.class)
+        AmazonS3 amazonS3() {
+            AmazonS3 mock = Mockito.mock(AmazonS3.class);
+            Mockito.when(mock.doesBucketExistV2(Mockito.anyString())).thenReturn(true);
+            return mock;
+        }
+    }
 
     @Inject ApplicationContext context;
     @Inject App app;
     @Inject SlackConfiguration slackConfiguration;
-    @Inject SimpleStorageService simpleStorageService;
-
-    @BeforeEach
-    void setup() {
-        if (!simpleStorageService.listBucketNames().contains(BUCKET_NAME)) {
-            simpleStorageService.createBucket(BUCKET_NAME);
-        }
-    }
 
     @Test
     void testS3ServicesInitialized() {

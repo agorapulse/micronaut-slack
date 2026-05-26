@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2022-2023 Agorapulse.
+ * Copyright 2022-2026 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+plugins {
+    id 'groovy'
+}
+
+apply plugin: 'io.micronaut.application'
+apply plugin: 'com.agorapulse.gradle.micronaut-application'
+apply plugin: 'com.agorapulse.gradle.groovy-common-configuration'
+
+repositories {
+    mavenCentral()
+}
+
+graalvmNative.toolchainDetection = false
+
+micronaut {
+    importMicronautPlatform = true
+    version(micronautVersion)
+    runtime('netty')
+    testRuntime('spock2')
+    processing {
+        incremental(false)
+    }
+}
+
 dependencies {
+    annotationProcessor 'io.micronaut:micronaut-inject-java'
+
     implementation project(':micronaut-slack-http')
     implementation 'io.micronaut:micronaut-http-server-netty'
     implementation 'ch.qos.logback:logback-classic:1.4.1'
     implementation 'org.yaml:snakeyaml'
+}
+
+application {
+    mainClass.set('com.agorapulse.slack.example.commander.CommanderApplication')
 }

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2022-2023 Agorapulse.
+ * Copyright 2022-2026 Agorapulse.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,23 +15,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+configurations.all {
+    // The Micronaut 5 platform forces Jetty 12 / Servlet 6, but the legacy
+    // AuthTestMockServer used in slack-bolt tests targets Jetty 11 / Servlet 5.
+    // Roll those back on the test classpath.
+    resolutionStrategy {
+        eachDependency { details ->
+            if (details.requested.group == 'org.eclipse.jetty' && details.requested.name.startsWith('jetty-')) {
+                details.useVersion '11.0.18'
+            }
+            if (details.requested.group == 'jakarta.servlet' && details.requested.name == 'jakarta.servlet-api') {
+                details.useVersion '5.0.0'
+            }
+        }
+    }
+}
+
 dependencies {
     api project(':micronaut-slack-core')
     api 'io.micronaut:micronaut-http-server'
 
     implementation 'io.micronaut:micronaut-jackson-databind'
 
-    testImplementation 'com.agorapulse:gru-micronaut:2.0.5'
+    testImplementation "com.agorapulse:gru-micronaut:$gruVersion"
     testImplementation 'io.micronaut:micronaut-http-server-netty'
     testImplementation 'io.micronaut:micronaut-http-client'
     testImplementation 'org.mockito:mockito-core:4.8.0'
 
+    // Pin Jetty 11 (jakarta.servlet 5) for the AuthTestMockServer used in slack-bolt tests.
+    // The Micronaut 5 platform BOM otherwise upgrades to Jetty 12 / Servlet 6, which
+    // reorganized packages and breaks the legacy mock server used here.
+    testImplementation 'jakarta.servlet:jakarta.servlet-api:5.0.0'
     testImplementation 'org.eclipse.jetty:jetty-servlet:11.0.18'
     testImplementation 'org.eclipse.jetty:jetty-server:11.0.18'
     testImplementation 'org.eclipse.jetty:jetty-webapp:11.0.18'
     testImplementation 'org.apache.logging.log4j:log4j-slf4j2-impl:2.17.2'
-}
 
-repositories {
-    mavenCentral()
+    // JUnit 5 + Micronaut JUnit 5 extension (for the Java tests)
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testImplementation 'io.micronaut.test:micronaut-test-junit5'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }
