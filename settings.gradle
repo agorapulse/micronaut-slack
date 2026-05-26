@@ -60,7 +60,7 @@ develocity {
 rootProject.name = 'micronaut-slack-root'
 
 gradleProjects {
-    directories = ['libs', 'examples']
+    directories = ['libs', 'examples', 'docs']
 
     plugins {
         dirs(['libs']) {
@@ -71,8 +71,3 @@ gradleProjects {
         }
     }
 }
-
-// docs
-include ':guide'
-project(':guide').projectDir = file('docs/guide')
-project(':guide').buildFileName = 'guide.gradle'

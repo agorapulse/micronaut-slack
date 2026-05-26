@@ -42,13 +42,12 @@ dependencies {
     testImplementation 'io.micronaut:micronaut-http-client'
     testImplementation 'org.mockito:mockito-core:4.8.0'
 
-    // Pin Jetty 11 (jakarta.servlet 5) for the AuthTestMockServer used in slack-bolt tests.
-    // The Micronaut 5 platform BOM otherwise upgrades to Jetty 12 / Servlet 6, which
-    // reorganized packages and breaks the legacy mock server used here.
-    testImplementation 'jakarta.servlet:jakarta.servlet-api:5.0.0'
-    testImplementation 'org.eclipse.jetty:jetty-servlet:11.0.18'
-    testImplementation 'org.eclipse.jetty:jetty-server:11.0.18'
-    testImplementation 'org.eclipse.jetty:jetty-webapp:11.0.18'
+    // Keep Jetty artifacts on the test classpath for the legacy AuthTestMockServer.
+    // The version is rolled back globally by the resolutionStrategy above (Jetty 11
+    // / Servlet 5); declaring without versions lets that strategy take effect.
+    testImplementation 'org.eclipse.jetty:jetty-server'
+    testImplementation 'org.eclipse.jetty:jetty-servlet'
+    testImplementation 'org.eclipse.jetty:jetty-webapp'
     testImplementation 'org.apache.logging.log4j:log4j-slf4j2-impl:2.17.2'
 
     // JUnit 5 + Micronaut JUnit 5 extension (for the Java tests)
