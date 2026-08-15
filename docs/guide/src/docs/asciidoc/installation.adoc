@@ -10,11 +10,11 @@ repositories {
 
 dependencies {
     // for sending messages and other simple integration
-    implemenation 'com.agorapulse:micronaut-slack-core:{project-version}'
+    implementation 'com.agorapulse:micronaut-slack-core:{project-version}'
 
     // for providing own webhooks, event handlers and OAuth workflow
-    implemenation 'com.agorapulse:micronaut-slack-http:{project-version}'
-    implemenation 'io.micronaut:micronaut-http-server-netty'
+    implementation 'com.agorapulse:micronaut-slack-http:{project-version}'
+    implementation 'io.micronaut:micronaut-http-server-netty'
 }
 ----
 
